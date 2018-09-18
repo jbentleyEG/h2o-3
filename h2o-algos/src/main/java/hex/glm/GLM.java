@@ -644,7 +644,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
 
     private void fitCOD_multinomial(Solver s) {
       double[] beta = _state.betaMultinomial();
-
+      LineSearchSolver ls;
 
       do {
         beta = beta.clone();
@@ -652,9 +652,15 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
             _state.setActiveClass(c);
             boolean onlyIcpt = _state.activeDataMultinomial(c).fullN() == 0;
 
-            LineSearchSolver ls = (_state.l1pen() == 0)
+            if (_state.l1pen()==0) {
+              if (_state.ginfoNull())
+                _state.updateState(beta, _state.gslvr().getGradient(beta));
+              ls = new MoreThuente(_state.gslvrMultinomial(c), _state.betaMultinomial(c, beta), _state.ginfoMultinomial(c));
+            } else
+              ls = new SimpleBacktrackingLS(_state.gslvrMultinomial(c), _state.betaMultinomial(c, beta), _state.l1pen());
+/*            LineSearchSolver ls = (_state.l1pen() == 0)
                     ? new MoreThuente(_state.gslvrMultinomial(c), _state.betaMultinomial(c, beta), _state.ginfoMultinomial(c))
-                    : new SimpleBacktrackingLS(_state.gslvrMultinomial(c), _state.betaMultinomial(c, beta), _state.l1pen());
+                    : new SimpleBacktrackingLS(_state.gslvrMultinomial(c), _state.betaMultinomial(c, beta), _state.l1pen());*/
 
             new GLMMultinomialUpdate(_state.activeDataMultinomial(), _job._key, beta, c).doAll(_state.activeDataMultinomial()._adaptedFrame);
             ComputationState.GramXY gram = _state.computeGram(_state.betaMultinomial(c, beta), s);
@@ -668,7 +674,10 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
           }
 
         _state.setActiveClass(-1);
-      } while (progress(beta, _state.gslvr().getMultinomialLikelihood(beta))); // only need likelihood
+      } while (progress(beta, _state.gslvr().getMultinomialLikelihood(beta))); // only need likelihood inside loop
+      if (_parms._lambda_search ) {
+        _state.updateState(beta, _state.gslvr().getGradient(beta));  // only calculate _gradient here when needed
+      }
     }
 
     private void fitIRLSM_multinomial(Solver s) {
