@@ -15,6 +15,7 @@ import water.*;
 import water.exceptions.H2OIllegalArgumentException;
 import water.exceptions.H2OModelBuilderIllegalArgumentException;
 import water.fvec.*;
+import water.util.VecUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -489,8 +490,11 @@ public class GLMBasicTestBinomial extends TestUtil {
     try {
    //   train = parse_test_file("smalldata/glm_test/multinomial_3_class.csv");
       train = parse_test_file("smalldata/glm_test/binomial_1000Rows.csv");
+      String[] names = train._names;
+      Vec[] en = train.remove(new int[] {0,1,2,3,4,5,6});
       for (int cind = 0; cind <7; cind++) {
-        train.replace(cind, train.vec(cind).toCategoricalVec()).remove();
+        train.add(names[cind], VecUtils.toCategoricalVec(en[cind]));
+        Scope.track(en[cind]);
       }
       Scope.track(train);
       params._response_column = "C79";
@@ -508,7 +512,6 @@ public class GLMBasicTestBinomial extends TestUtil {
       Scope.track_generic(model);
 
       compareGLMCoeffs(model._output._submodels[0].beta, goldenCoeffs, 1e-10);  // compare to original GLM
-
     } finally{
       Scope.exit();
     }
