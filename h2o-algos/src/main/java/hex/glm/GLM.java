@@ -673,7 +673,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
             _state.setBetaMultinomial(c, beta, ls.getX());  // set new beta
           }
 
-        _state.setActiveClass(-1);
+        _state.setActiveClass(-1); // only reset after going through a whole set of classes.  Not sure about this
       } while (progress(beta, _state.gslvr().getMultinomialLikelihood(beta))); // only need likelihood inside loop
       if (_parms._lambda_search ) {
         _state.updateState(beta, _state.gslvr().getGradient(beta));  // only calculate _gradient here when needed
