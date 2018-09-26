@@ -1,4 +1,4 @@
-package water.rapids.ast.prims.advmath;
+package water.rapids.ast.prims.mungers;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -8,14 +8,13 @@ import org.junit.rules.ExpectedException;
 import water.Scope;
 import water.TestUtil;
 import water.exceptions.H2OIllegalArgumentException;
-import water.fvec.TestFrameBuilder;
 import water.fvec.Frame;
+import water.fvec.TestFrameBuilder;
 import water.fvec.Vec;
 import water.rapids.Rapids;
+import water.rapids.Session;
 import water.rapids.Val;
 import water.rapids.vals.ValFrame;
-import water.util.ArrayUtils;
-import water.rapids.Session;
 public class AstFillNATest extends TestUtil {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
